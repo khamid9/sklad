@@ -6,4 +6,5 @@ import { AuthProvider } from './context/AuthContext'
 import './index.css'
 import './operations.css'
 import './catalog.css'
+import './auth.css'
 createRoot(document.getElementById('root')).render(<StrictMode><BrowserRouter><AuthProvider><App /></AuthProvider></BrowserRouter></StrictMode>)
