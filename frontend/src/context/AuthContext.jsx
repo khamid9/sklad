@@ -1,0 +1,5 @@
+import { createContext, useContext, useMemo, useState } from 'react'
+import { getMe, login as requestLogin } from '../api/auth'
+const AuthContext = createContext(null)
+export function AuthProvider({ children }) { const [token, setToken] = useState(() => localStorage.getItem('sklad_token')); const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('sklad_user') || 'null')); const login = async (credentials) => { const { data } = await requestLogin(credentials); const accessToken = data.access_token || data.token; localStorage.setItem('sklad_token', accessToken); const profile = data.user || (await getMe()).data; localStorage.setItem('sklad_user', JSON.stringify(profile)); setToken(accessToken); setUser(profile) }; const logout = () => { localStorage.removeItem('sklad_token'); localStorage.removeItem('sklad_user'); setToken(null); setUser(null) }; return <AuthContext.Provider value={useMemo(() => ({ user, token, login, logout, isAuthenticated: Boolean(token) }), [user, token])}>{children}</AuthContext.Provider> }
+export const useAuth = () => useContext(AuthContext)

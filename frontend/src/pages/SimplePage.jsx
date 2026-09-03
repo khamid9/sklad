@@ -1,0 +1,1 @@
+export default function SimplePage({ title, description }) { return <><header className="page-head"><div><span className="eyebrow">МОЙ СКЛАД</span><h1>{title}</h1><p>{description}</p></div></header><section className="panel empty-state"><div>🚧</div><h3>Раздел готов к подключению API</h3><p>{description}</p></section></> }

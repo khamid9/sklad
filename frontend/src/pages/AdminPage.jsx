@@ -1,0 +1,14 @@
+import { ShieldCheck, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { approveUser, deleteUser, getAdminStatistics, getUsers } from '../api/admin'
+import { getErrorMessage } from '../api/client'
+
+export default function AdminPage() {
+  const [users, setUsers] = useState([])
+  const [stats, setStats] = useState(null)
+  const [error, setError] = useState('')
+  useEffect(() => { Promise.all([getUsers(), getAdminStatistics()]).then(([userResponse, statsResponse]) => { setUsers(userResponse.data); setStats(statsResponse.data) }).catch(err => setError(getErrorMessage(err))) }, [])
+  const approve = async user => { try { await approveUser(user.id); setUsers(users.map(item => item.id === user.id ? { ...item, is_approved: true, is_active: true } : item)) } catch (err) { setError(getErrorMessage(err)) } }
+  const remove = async user => { if (!window.confirm(`Удалить пользователя ${user.name}?`)) return; try { await deleteUser(user.id); setUsers(users.filter(item => item.id !== user.id)) } catch (err) { setError(getErrorMessage(err)) } }
+  return <><header className="page-head"><div><span className="eyebrow">АДМИНИСТРИРОВАНИЕ</span><h1>Панель администратора</h1><p>Одобряйте заявки на доступ и управляйте пользователями.</p></div></header>{error && <div className="form-error">{error}</div>}<section className="stats-grid"><article className="stat-card"><div><p>Пользователей</p><h2>{stats?.users_count || 0}</h2><small>зарегистрировано</small></div><div className="stat-icon"><Users size={19}/></div></article><article className="stat-card violet"><div><p>Товаров</p><h2>{stats?.products_count || 0}</h2><small>во всех складах</small></div><div className="stat-icon">#</div></article><article className="stat-card green"><div><p>Выручка</p><h2>{stats?.revenue || 0} сом</h2><small>за всё время</small></div><div className="stat-icon">↗</div></article></section><section className="panel"><div className="panel-title"><div><h3>Пользователи</h3><p>Заявки и активные аккаунты</p></div><ShieldCheck size={21}/></div><div className="table-wrap"><table><thead><tr><th>Имя</th><th>Email</th><th>Роль</th><th>Статус</th><th /></tr></thead><tbody>{users.map(user => <tr key={user.id}><td><b>{user.name}</b></td><td>{user.email}</td><td><span className="tag">{user.role}</span></td><td>{!user.is_approved ? 'Ожидает одобрения' : user.is_active ? 'Активен' : 'Заблокирован'}</td><td><div className="admin-actions">{!user.is_approved && <button className="secondary" onClick={() => approve(user)}>Одобрить</button>}{user.role !== 'admin' && <button className="danger-button" onClick={() => remove(user)}>Удалить</button>}</div></td></tr>)}</tbody></table></div></section></>
+}
